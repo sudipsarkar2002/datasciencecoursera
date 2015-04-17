@@ -19,7 +19,7 @@ library(ggplot2)
 mydata <- read.table(file = "activity.csv", header = TRUE, sep = ",")
 
 ```
-**Calculate the Sum of steps per day and eleminating NA records**
+**Question 1 - Calculate the Sum of steps per day and eleminating NA records**
 ```{r}
 
  Totalstepsperday <- setNames(
@@ -32,7 +32,7 @@ mydata <- read.table(file = "activity.csv", header = TRUE, sep = ",")
                            c("date","steps")
                          )
 ```
-**Draw a plot using ggplot12**
+**Draw a plot using ggplot2**
 ```{r}
 Totalstepshist <- ggplot(Totalstepsperday,aes(x=date,y=steps)) + 
   geom_bar(stat="identity") + 
@@ -62,7 +62,7 @@ avgPattern <- aggregate(steps~interval,mydata,mean,na.rm = TRUE)
 ```{r}
 
 plotavgPattern <- ggplot(avgPattern,aes(x=interval,y=steps)) + 
-               geom_line() 
+                  geom_line() 
 ```
 
 **Print the graph**
@@ -76,15 +76,18 @@ with(avgPattern,avgPattern[steps == max(steps),])
 ```
 
 ##Question 3 - Inputing missing values
+
 **Number of NA values in the data set**
 ```{r}
 length(mydata[is.na(mydata)])
 ```
-Copy the Data in a new variable
+
+**Copy the Data in a new variable**
 ```{r}
 newmydata <- mydata
 ```
-Use Loop to fill in average values wherever there is NA
+
+**Use Loop to fill in average values wherever there is NA**
 ```{r}
     for (i in 1:nrow(newmydata)){
           if (is.na(newmydata$steps[i])){
@@ -96,7 +99,7 @@ Use Loop to fill in average values wherever there is NA
      }
 ```
 
-Calculate the Average 
+**Calculate the Average** 
 ```{r}
 Totalstepsperday_imputed <- setNames(
                           aggregate(
@@ -108,7 +111,7 @@ Totalstepsperday_imputed <- setNames(
                          )
 ```
 
-Call ggplot to prepare and print graph
+**Call ggplot to prepare and print graph**
 ```{r}
   Totalstepshist_imputed <- ggplot(Totalstepsperday_imputed,aes(x=date,y=steps)) + 
                             geom_bar(stat="identity") + 
@@ -117,18 +120,18 @@ Call ggplot to prepare and print graph
   print(Totalstepshist_imputed)
 ```  
 
-Calculate mean
+**Calculate mean**
 ```{r}
 mean(Totalstepsperday_imputed$steps)
 ```
 
-Calculate Median
+**Calculate Median**
 ```{r}
 median(Totalstepsperday_imputed$steps)
 ```
 
 
-Comparing the imputed plot with the previous plot, it is observed that there is no major impactin estimating the total number of steps per day.
+**Comparing the imputed plot with the previous plot, it is observed that there is no major impactin estimating the total number of steps per day.**
 
 
 
