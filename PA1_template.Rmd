@@ -1,0 +1,161 @@
+---
+title: "Assignment1"
+author: "Sudip Sarkar"
+date: "Monday, April 13, 2015"
+output: html_document
+---
+
+##Question 1 - What is mean total number of steps taken per day?
+
+**Load Library**
+```{r}
+library(ggplot2)
+
+```
+
+**Loading and preprocessing the data**
+
+```{r}
+mydata <- read.table(file = "activity.csv", header = TRUE, sep = ",")
+
+```
+**Calculate the Sum of steps per day and eleminating NA records**
+```{r}
+
+ Totalstepsperday <- setNames(
+                          aggregate(
+                                     steps~as.Date(date),
+                                     mydata,
+                                     sum,
+                                     na.rm = TRUE
+                                    ),
+                           c("date","steps")
+                         )
+```
+**Draw a plot using ggplot12**
+```{r}
+Totalstepshist <- ggplot(Totalstepsperday,aes(x=date,y=steps)) + 
+  geom_bar(stat="identity") + 
+  ggtitle("Total number of steps per day (source data)")
+
+```
+
+**Print the graph**
+
+```{r}
+print(Totalstepshist)
+```
+
+**Print the summary showing the Median and mean**
+```{r}
+summary(Totalstepsperday$steps)
+```
+
+##Question 2 - What is the average daily activity pattern?
+
+**Calculate the Average Steps**
+```{r}
+avgPattern <- aggregate(steps~interval,mydata,mean,na.rm = TRUE)
+```
+
+**Plot the graph using ggplot2**
+```{r}
+
+plotavgPattern <- ggplot(avgPattern,aes(x=interval,y=steps)) + 
+               geom_line() 
+```
+
+**Print the graph**
+```{r}
+print(plotavgPattern)
+```
+
+**Finding the Step with the peak value for steps**
+```{r}
+with(avgPattern,avgPattern[steps == max(steps),])
+```
+
+##Question 3 - Inputing missing values
+**Number of NA values in the data set**
+```{r}
+length(mydata[is.na(mydata)])
+```
+Copy the Data in a new variable
+```{r}
+newmydata <- mydata
+```
+Use Loop to fill in average values wherever there is NA
+```{r}
+    for (i in 1:nrow(newmydata)){
+          if (is.na(newmydata$steps[i])){
+            interval_val <- newmydata$interval[i]
+            row_id <- which(avgPattern$interval == interval_val)
+            steps_val <- avgPattern$steps[row_id]
+            newmydata$steps[i] <- steps_val
+          }
+     }
+```
+
+Calculate the Average 
+```{r}
+Totalstepsperday_imputed <- setNames(
+                          aggregate(
+                                     steps~as.Date(date),
+                                     newmydata,
+                                     sum,   na.rm = TRUE
+                                    ),
+                           c("date","steps")
+                         )
+```
+
+Call ggplot to prepare and print graph
+```{r}
+  Totalstepshist_imputed <- ggplot(Totalstepsperday_imputed,aes(x=date,y=steps)) + 
+                            geom_bar(stat="identity") + 
+  ggtitle("Total number of steps per day (Fixed data)")
+
+  print(Totalstepshist_imputed)
+```  
+
+Calculate mean
+```{r}
+mean(Totalstepsperday_imputed$steps)
+```
+
+Calculate Median
+```{r}
+median(Totalstepsperday_imputed$steps)
+```
+
+
+Comparing the imputed plot with the previous plot, it is observed that there is no major impactin estimating the total number of steps per day.
+
+
+
+##Question 4 - Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+mydata$date <- as.Date(mydata$date, "%Y-%m-%d")
+```
+```{r}
+# add a new column to indicate day of the week 
+mydata$day <- weekdays(mydata$date)
+
+#add a new column called day type and initialize to weekday
+mydata$day_type <- c("weekday")
+ 
+# If day is Saturday or Sunday, Change day_type as weekend
+for (i in 1:nrow(mydata)){
+  if (mydata$day[i] == "Saturday" || mydata$day[i] == "Sunday"){
+    mydata$day_type[i] <- "weekend"
+  }
+ }
+
+# convert day_time from character to factor
+mydata$day_type <- as.factor(mydata$day_type)
+
+week_interval_steps <- aggregate(steps ~ interval+day_type, mydata, mean)
+
+qplot(interval, steps, data=week_interval_steps, geom=c("line"), xlab="Interval", 
+      ylab="Number of steps", main="") + facet_wrap(~ day_type, ncol=1)
+```
